@@ -3,6 +3,13 @@ import { BsCheckCircleFill } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { logoLight } from "../../assets/images";
 
+import { getDb } from "../../firebase"; // Import the configured Firestore instance
+import { collection, query, where, getDocs, addDoc } from "firebase/firestore";
+import {  RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+import {getAuthentication} from "../../firebase"
+import { createUserWithEmailAndPassword } from "firebase/auth";
+
+
 const SignUp = () => {
   // ============= Initial State Start here =============
   const [clientName, setClientName] = useState("");
@@ -24,6 +31,8 @@ const SignUp = () => {
   const [errCity, setErrCity] = useState("");
   const [errCountry, setErrCountry] = useState("");
   const [errZip, setErrZip] = useState("");
+  const [verificationId, setVerificationId] = useState("");
+
   // ============= Error Msg End here ===================
   const [successMsg, setSuccessMsg] = useState("");
   // ============= Event Handler Start here =============
@@ -68,7 +77,21 @@ const SignUp = () => {
   };
   // ================= Email Validation End here ===============
 
-  const handleSignUp = (e) => {
+  const setupRecaptcha = () => {
+    window.recaptchaVerifier = new RecaptchaVerifier(
+      "recaptcha-container",
+      {
+        size: "invisible",
+        callback: (response) => {
+          // reCAPTCHA solved, allow signInWithPhoneNumber.
+          console.log("Recaptcha verified");
+        },
+      },
+      getAuthentication()
+    );
+  };
+
+  const handleSignUp = async (e) => {
     e.preventDefault();
     if (checked) {
       if (!clientName) {
@@ -115,17 +138,58 @@ const SignUp = () => {
         country &&
         zip
       ) {
-        setSuccessMsg(
-          `Hello dear ${clientName}, Welcome you to OREBI Admin panel. We received your Sign up request. We are processing to validate your access. Till then stay connected and additional assistance will be sent to you by your mail at ${email}`
+        const q = query(
+          collection(getDb(), "users"),
+          where("email", "==", email),
+          where("phone", "==", phone)
         );
-        setClientName("");
-        setEmail("");
-        setPhone("");
-        setPassword("");
-        setAddress("");
-        setCity("");
-        setCountry("");
-        setZip("");
+        const querySnapshot = await getDocs(q);
+
+        const userCredential = await createUserWithEmailAndPassword(getAuthentication(), email, password);
+        const user = userCredential.user;
+
+        
+        if (querySnapshot.empty) {
+          // User does not exist, proceed with registration
+          await addDoc(collection(getDb(), "users"), {
+            clientName,
+            email,
+            phone,
+            password,
+            address,
+            city,
+            country,
+            zip,
+            uid:user.uid
+          });
+          const userData = {
+            name: clientName,
+            email: email,
+            uid: user.uid,
+          };
+          localStorage.setItem("user", JSON.stringify(userData));
+
+          setSuccessMsg(
+            `Hello dear ${clientName}, Welcome you to Ridex`
+          );
+          setTimeout(function(){
+            window.location.href = "/"
+          })
+          
+
+          setClientName("");
+          setEmail("");
+          setPhone("");
+          setPassword("");
+          setAddress("");
+          setCity("");
+          setCountry("");
+          setZip("");
+        } else {
+          // User already exists
+          setErrEmail("A user with this email or phone number already exists.");
+          setErrPhone("A user with this email or phone number already exists.");
+        }
       }
     }
   };
@@ -142,48 +206,10 @@ const SignUp = () => {
             </h1>
             <p className="text-base">Create your account to access more</p>
           </div>
-          <div className="w-[300px] flex items-start gap-3">
-            <span className="text-green-500 mt-1">
-              <BsCheckCircleFill />
-            </span>
-            <p className="text-base text-gray-300">
-              <span className="text-white font-semibold font-titleFont">
-                Get started fast with OREBI
-              </span>
-              <br />
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ab omnis
-              nisi dolor recusandae consectetur!
-            </p>
-          </div>
-          <div className="w-[300px] flex items-start gap-3">
-            <span className="text-green-500 mt-1">
-              <BsCheckCircleFill />
-            </span>
-            <p className="text-base text-gray-300">
-              <span className="text-white font-semibold font-titleFont">
-                Access all OREBI services
-              </span>
-              <br />
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ab omnis
-              nisi dolor recusandae consectetur!
-            </p>
-          </div>
-          <div className="w-[300px] flex items-start gap-3">
-            <span className="text-green-500 mt-1">
-              <BsCheckCircleFill />
-            </span>
-            <p className="text-base text-gray-300">
-              <span className="text-white font-semibold font-titleFont">
-                Trusted by online Shoppers
-              </span>
-              <br />
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ab omnis
-              nisi dolor recusandae consectetur!
-            </p>
-          </div>
+         
           <div className="flex items-center justify-between mt-10">
             <p className="text-sm font-titleFont font-semibold text-gray-300 hover:text-white cursor-pointer duration-300">
-              © OREBI
+              © Ridex
             </p>
             <p className="text-sm font-titleFont font-semibold text-gray-300 hover:text-white cursor-pointer duration-300">
               Terms

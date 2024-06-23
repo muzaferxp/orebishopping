@@ -7,6 +7,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { paginationItems } from "../../../constants";
 import { BsSuitHeartFill } from "react-icons/bs";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { getDb } from "../../../firebase";
+
 
 const HeaderBottom = () => {
   const products = useSelector((state) => state.orebiReducer.products);
@@ -32,11 +35,55 @@ const HeaderBottom = () => {
     setSearchQuery(e.target.value);
   };
 
+  let AllProducts = [];
+
   useEffect(() => {
-    const filtered = paginationItems.filter((item) =>
-      item.productName.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setFilteredProducts(filtered);
+    const fetchProducts = async () => {
+      if (searchQuery.trim() === "") {
+        setFilteredProducts([]);
+        return;
+      }
+
+  
+      
+
+      if (AllProducts.length == 0) {
+        const querySnapshot = await getDocs(collection(getDb(), "products"));
+        AllProducts = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+      }
+
+      const filtered = [];
+      AllProducts.forEach((doc) => {
+        let data = doc
+        if (JSON.stringify(data).toLowerCase().includes(searchQuery.toLowerCase())) {
+          filtered.push({
+            _id: doc.id, ...{
+
+              img: data.thumbnail,
+              productName: data.title,
+              price: data.price,
+              color: data.varients,
+              badge: true,
+              brand: "Ridex",
+              des: "Description",
+              cat: "All",
+              pdf: "",
+              ficheTech: [
+                ...Object.keys(data.more_info).map( (key) =>  { return {label:key, value: data.more_info[key].join(", \n")} } ) ,
+               
+               ],
+        }});
+        }
+
+      });
+
+      setFilteredProducts(filtered);
+    };
+
+    fetchProducts();
   }, [searchQuery]);
 
   return (
@@ -103,7 +150,7 @@ const HeaderBottom = () => {
                           `/product/${item.productName
                             .toLowerCase()
                             .split(" ")
-                            .join("")}`,
+                            .join("").split("/").join("")}`,
                           {
                             state: {
                               item: item,

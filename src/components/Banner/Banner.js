@@ -5,12 +5,13 @@ import {
   bannerImgOne,
   bannerImgTwo,
   bannerImgThree,
-} from "../../assets/images";
+} from "../../assets/images/";
 import Image from "../designLayouts/Image";
 
 const CustomSlide = ({ Subtext, imgSrc, text, buttonLink, buttonText }) => (
   <div
     style={{
+      padding:"10px 150px",
       position: "relative",
       backgroundColor: "#F5F5F3", // Gray background color
       display: "flex",
@@ -151,28 +152,28 @@ const Banner = () => {
 
   const slides = [
     {
-      imgSrc: bannerImgOne,
-      text: "Enhance Your Printing Experience",
+      imgSrc: bannerImgTwo,
+      text: "Ridex",
       Subtext:
-        "Explore our premium printers and consumables for exceptional results",
+        "Your Destination for Exceptional Horse Accessories starts at $200",
       buttonLink: "/offer",
       buttonText: "Shop Now",
     },
     {
       imgSrc: bannerImgOne,
-      text: "Quality Printing Solutions",
+      text: "Premium Quality",
       Subtext:
-        "Discover our wide range of printers and consumables designed for professional printing needs.",
+        "Explore our range of high-quality horse riding gear.",
       buttonLink: "/shop",
-      buttonText: "About-us",
+      buttonText: "Know More",
     },
     {
-      imgSrc: bannerImgOne,
-      text: "Efficiency Redefined",
+      imgSrc: bannerImgThree,
+      text: "Who We Are",
       Subtext:
-        "Maximize productivity with our advanced printers and high-quality consumables. ",
-      buttonLink: "/contact",
-      buttonText: "Contact-us",
+        "Dedicated to providing premium horse accessories since 1995",
+      buttonLink: "/About-us",
+      buttonText: "About Us",
     },
 
     // Add more slides as needed
@@ -181,7 +182,7 @@ const Banner = () => {
     <div className="w-full bg-white">
       <Slider {...settings}>
         {slides.map((slide, index) => (
-          <CustomSlide key={index} {...slide} />
+          <CustomSlide key={index} {...slide}  />
         ))}
       </Slider>
     </div>

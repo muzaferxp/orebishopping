@@ -1,7 +1,9 @@
-import React from "react";
 import Slider from "react-slick";
 import Heading from "../Products/Heading";
 import Product from "../Products/Product";
+import React, { useEffect, useState } from "react";
+import { findAll } from '../../../services/products.service';
+
 import {
   newArrOne,
   newArrTwo,
@@ -10,8 +12,14 @@ import {
 } from "../../../assets/images/index";
 import SampleNextArrow from "./SampleNextArrow";
 import SamplePrevArrow from "./SamplePrevArrow";
+import cong from '../../../firebase';
+// import { getDatabase, ref, onValue } from "firebase/database";
+import { getDocs, collection } from "firebase/firestore";
 
 const NewArrivals = () => {
+  const [data, setData] = useState([]);
+
+
   const settings = {
     infinite: true,
     speed: 500,
@@ -46,65 +54,39 @@ const NewArrivals = () => {
       },
     ],
   };
+
+
+  const fetchData = async () => {
+
+    const res = await findAll()
+console.log(res)
+    setData([...res])
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
   return (
     <div className="w-full pb-16">
       <Heading heading="New Arrivals" />
       <Slider {...settings}>
-        <div className="px-2">
-          <Product
-            _id="100001"
-            img={newArrOne}
-            productName="Round Table Clock"
-            price="44.00"
-            color="Black"
-            badge={true}
-            des="Lorem ipsum dolor sit amet consectetur adipisicing elit. Hic excepturi quibusdam odio deleniti reprehenderit facilis."
-          />
-        </div>
-        <div className="px-2">
-          <Product
-            _id="100002"
-            img={newArrTwo}
-            productName="Smart Watch"
-            price="250.00"
-            color="Black"
-            badge={true}
-            des="Lorem ipsum dolor sit amet consectetur adipisicing elit. Hic excepturi quibusdam odio deleniti reprehenderit facilis."
-          />
-        </div>
-        <div className="px-2">
-          <Product
-            _id="100003"
-            img={newArrThree}
-            productName="cloth Basket"
-            price="80.00"
-            color="Mixed"
-            badge={true}
-            des="Lorem ipsum dolor sit amet consectetur adipisicing elit. Hic excepturi quibusdam odio deleniti reprehenderit facilis."
-          />
-        </div>
-        <div className="px-2">
-          <Product
-            _id="100004"
-            img={newArrFour}
-            productName="Funny toys for babies"
-            price="60.00"
-            color="Mixed"
-            badge={false}
-            des="Lorem ipsum dolor sit amet consectetur adipisicing elit. Hic excepturi quibusdam odio deleniti reprehenderit facilis."
-          />
-        </div>
-        <div className="px-2">
-          <Product
-            _id="100005"
-            img={newArrTwo}
-            productName="Funny toys for babies"
-            price="60.00"
-            color="Mixed"
-            badge={false}
-            des="Lorem ipsum dolor sit amet consectetur adipisicing elit. Hic excepturi quibusdam odio deleniti reprehenderit facilis."
-          />
-        </div>
+
+      {data.map((item, index) => (
+              
+              <div className="px-2" key={index}>
+              <Product
+                _id="100001"
+                img={item.thumbnail}
+                productName={item.title}
+                price={item.price}
+                color={item.varients}
+                badge={true}
+                des="Lorem ipsum dolor sit amet consectetur adipisicing elit. Hic excepturi quibusdam odio deleniti reprehenderit facilis."
+              />
+              </div>
+            ))}    
+
       </Slider>
     </div>
   );

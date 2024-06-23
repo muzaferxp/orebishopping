@@ -1,12 +1,14 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReactPaginate from "react-paginate";
 import Product from "../../home/Products/Product";
 import { useSelector } from "react-redux";
 import { paginationItems } from "../../../constants";
+import { findAll } from "../../../services/products.service";
 
-const items = paginationItems;
+let items = []
 
 function Items({ currentItems, selectedBrands, selectedCategories }) {
+
   // Filter items based on selected brands and categories
   const filteredItems = currentItems.filter((item) => {
     const isBrandSelected =
@@ -43,7 +45,45 @@ function Items({ currentItems, selectedBrands, selectedCategories }) {
 
 const Pagination = ({ itemsPerPage }) => {
   const [itemOffset, setItemOffset] = useState(0);
-  const [itemStart, setItemStart] = useState(1);
+  const [itemStart, setItemStart] = useState(12);
+  const [items, setItems] = useState([]);
+
+
+
+
+  const fetchData = async () => {
+
+    const res = await findAll()
+
+    const res2 = res.map((item) => {
+      console.log(item.more_info)
+      return {
+        _id: item.id,
+        img: item.thumbnail,
+        productName: item.title,
+        price: item.price,
+        color: item.varients,
+        badge: true,
+        brand: "Ridex",
+        more_info : item.more_info,
+        des: "-",
+        cat: "-",
+        pdf: "",
+        ficheTech: [
+         ...Object.keys(item.more_info).map( (key) =>  { return {label:key, value: item.more_info[key].join(", \n")} } ) ,
+        
+        ],
+      };
+
+    })
+
+    setItems([...res2])
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
 
   const endOffset = itemOffset + itemsPerPage;
   const currentItems = items.slice(itemOffset, endOffset);

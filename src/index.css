@@ -32,3 +32,13 @@ nav .active li {
   display: none;
 }
 /* ============= NavLink active End here ================ */
+
+
+.product-image{
+  height: 300px !important;
+  object-fit: cover !important;
+}
+
+.offer-image{
+  /* height: 400px !important; */
+}

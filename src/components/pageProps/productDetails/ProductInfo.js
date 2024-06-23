@@ -87,10 +87,8 @@ const ProductInfo = ({ productInfo }) => {
         </svg>
       </div>
 
-      <p className="text-base text-green-600 font-medium">En Stock</p>
-      <p className="font-medium text-lg">
-        <span className="font-normal">Colors:</span> {productInfo.color}
-      </p>
+      <p className="text-base text-green-600 font-medium">In Stock</p>
+      
       <button
         onClick={() =>
           dispatch(
